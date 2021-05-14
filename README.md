@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-Split of join tar of tar.gz files on file boundaries
+Split or join tar (or tar.gz) files on file boundaries
 
 Usage:
   tarsplitter [command]
