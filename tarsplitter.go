@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func createDir(path string) error {
@@ -25,7 +26,11 @@ func SplitTar(destDir, prefix string, inTar io.Reader, useGzip bool, maxSplitSiz
 
 	splitNum := 0
 	splitSize := int64(0)
-	splitPath := fmt.Sprintf("%s/%s_%06d", destDir, prefix, splitNum)
+	baseName := prefix
+	if ext := filepath.Ext(prefix); ext != "" {
+		baseName = prefix[:len(prefix)-len(ext)]
+	}
+	splitPath := fmt.Sprintf("%s/%s_%06d.tar", destDir, baseName, splitNum)
 	splitFile, err := os.Create(splitPath)
 	if err != nil {
 		return err
@@ -76,7 +81,7 @@ func SplitTar(destDir, prefix string, inTar io.Reader, useGzip bool, maxSplitSiz
 				splitFile.Close()
 				splitNum += 1
 				splitSize = int64(0)
-				splitPath = fmt.Sprintf("%s/%s_%06d", destDir, prefix, splitNum)
+				splitPath = fmt.Sprintf("%s/%s_%06d.tar", destDir, baseName, splitNum)
 				splitFile, err = os.Create(splitPath)
 				if err != nil {
 					return err
