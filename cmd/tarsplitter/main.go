@@ -9,15 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Version = "dev" // default version, will be overridden by build flag
+
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tarsplitter",
-		Short: "Split of join tar of tar.gz files on file boundaries",
+		Short: "Split or join tar or tar.gz files on file boundaries",
 		Long:  ``,
 	}
 
 	cmd.AddCommand(NewJoinCmd())
 	cmd.AddCommand(NewSplitCmd())
+	cmd.AddCommand(NewVersionCmd())
 
 	return cmd
 }
@@ -26,7 +29,7 @@ func NewSplitCmd() *cobra.Command {
 	splitSize := int64(1000)
 	mib := int64(1048576)
 	cmd := &cobra.Command{
-		Use:   "split <tar file> <destination direction>",
+		Use:   "split <tar file> <destination directory>",
 		Short: "Split tar or tar.gz files on file boundaries",
 		Long:  ``,
 		Args:  cobra.ExactArgs(2),
@@ -61,6 +64,18 @@ func NewJoinCmd() *cobra.Command {
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			fmt.Println("Wouldn't that be nice!")
 			return nil
+		},
+	}
+	return cmd
+}
+
+func NewVersionCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number and exit",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("tarsplitter version", Version)
 		},
 	}
 	return cmd
