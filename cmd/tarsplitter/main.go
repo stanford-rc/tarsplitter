@@ -5,22 +5,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/messiaen/tarsplitter"
+	"github.com/stanford-rc/tarsplitter"
 	"github.com/spf13/cobra"
 )
-
-var Version = "dev" // default version, will be overridden by build flag
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tarsplitter",
-		Short: "Split or join tar or tar.gz files on file boundaries",
+		Short: "Split tar or tar.gz files on file boundaries",
 		Long:  ``,
 	}
 
-	cmd.AddCommand(NewJoinCmd())
 	cmd.AddCommand(NewSplitCmd())
-	cmd.AddCommand(NewVersionCmd())
 
 	return cmd
 }
@@ -45,39 +41,30 @@ func NewSplitCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return tarsplitter.SplitTar(dest, filepath.Base(sourceFn), reader, useGzip, splitSize*mib)
+
+			baseName := filepath.Base(sourceFn)
+			for {
+				ext := filepath.Ext(baseName)
+				if ext == ".tar" || ext == ".gz" {
+					baseName = baseName[0:len(baseName)-len(ext)]
+				} else {
+					break
+				}
+			}
+		
+			ts, err := tarsplitter.NewTarSplitter(
+				dest, baseName, splitSize * mib, useGzip)
+			if err != nil {
+				return err
+			}
+
+			return ts.Split(reader)
 		},
 	}
 
 	flags := cmd.Flags()
 	flags.Int64VarP(&splitSize, "split-size", "s", splitSize, "max size of split in MiB")
 
-	return cmd
-}
-
-func NewJoinCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "join <tar files ...>",
-		Short: "Join multiple tar or tar.gz files into one",
-		Long:  ``,
-		Args:  cobra.MinimumNArgs(1),
-		RunE: func(ccmd *cobra.Command, args []string) error {
-			fmt.Println("Wouldn't that be nice!")
-			return nil
-		},
-	}
-	return cmd
-}
-
-func NewVersionCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "version",
-		Short: "Print the version number and exit",
-		Long:  ``,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("tarsplitter version", Version)
-		},
-	}
 	return cmd
 }
 

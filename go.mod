@@ -1,4 +1,4 @@
-module github.com/messiaen/tarsplitter
+module github.com/stanford-rc/tarsplitter
 
 go 1.12
 
