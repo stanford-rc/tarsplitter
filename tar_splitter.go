@@ -108,9 +108,15 @@ func (p *TarSplitter) Split(r io.Reader) (err error) {
 
 		// if this record would put us over the maxBytes limit, close
 		// down this writer and re-open with the next sub-tar writer
-		if tw.Written()+(tarHdrSize+tarRecSize) > p.maxBytes {
+		totalRecSize := (tarHdrSize+tarRecSize)
+		if tw.Written()+totalRecSize > p.maxBytes {
 			if err = tw.Close(); err != nil {
 				return err
+			}
+
+			if totalRecSize > p.maxBytes {
+				return fmt.Errorf("size of record %#v is %d which exceeds limit of %d",
+					hdr, totalRecSize, p.maxBytes)
 			}
 
 			if tw, err = p.nextTarWriter(); err != nil {
